@@ -1,0 +1,29 @@
+/* style.css */
+body {
+  font-family: sans-serif;
+  background: #f7f7f7;
+  padding: 2rem;
+}
+
+h1 {
+  text-align: center;
+}
+
+.draggable {
+  padding: 0.5rem;
+  margin: 0.3rem;
+  background: #cce5ff;
+  border: 1px solid #004085;
+  cursor: move;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.dropzone {
+  margin: 0.5rem;
+  min-height: 2rem;
+  padding: 1rem;
+  background: #e2e3e5;
+  border: 2px dashed #6c757d;
+  border-radius: 6px;
+}

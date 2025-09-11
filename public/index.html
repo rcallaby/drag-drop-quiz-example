@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Drag and Drop Quiz</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Drag and Drop Quiz</h1>
+  <form id="quizForm">
+    <label>Username: <input type="text" id="username" required /></label>
+    <div id="quizContainer">Loading...</div>
+    <button type="submit">Submit Answers</button>
+  </form>
+  <script>
+    fetch('/api/question')
+      .then(res => res.json())
+      .then(questions => {
+        const container = document.getElementById('quizContainer');
+        container.innerHTML = '';
+        questions.forEach(q => {
+          const qDiv = document.createElement('div');
+          qDiv.innerHTML = `<h3>${q.question}</h3>`;
+          const items = q.items.map(item => `<div class="draggable" draggable="true">${item}</div>`).join('');
+          const zones = q.zones.map(zone => `<div class="dropzone" data-zone="${zone}">${zone}</div>`).join('');
+          qDiv.innerHTML += `<div class="items">${items}</div><div class="zones">${zones}</div>`;
+          container.appendChild(qDiv);
+        });
+        addDragEvents();
+      });
+
+    function addDragEvents() {
+      document.querySelectorAll('.draggable').forEach(elem => {
+        elem.addEventListener('dragstart', e => {
+          e.dataTransfer.setData('text/plain', e.target.textContent);
+        });
+      });
+
+      document.querySelectorAll('.dropzone').forEach(zone => {
+        zone.addEventListener('dragover', e => e.preventDefault());
+        zone.addEventListener('drop', e => {
+          e.preventDefault();
+          const data = e.dataTransfer.getData('text/plain');
+          zone.appendChild(document.createTextNode(data + ' '));
+        });
+      });
+    }
+
+    document.getElementById('quizForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const answers = [...document.querySelectorAll('.dropzone')].map(zone => ({
+        zone: zone.dataset.zone,
+        items: zone.textContent.trim().split(/\s+/)
+      }));
+      fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, answers })
+      }).then(res => {
+        if (res.ok) alert('Answers submitted!');
+        else alert('Submission failed.');
+      });
+    });
+  </script>
+</body>
+</html>
